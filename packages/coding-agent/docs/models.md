@@ -262,7 +262,7 @@ Route a built-in provider through a proxy without redefining models:
 
 All built-in Anthropic models remain available. Existing OAuth or API key auth continues to work.
 
-Set a provider service tier:
+Optionally, you can set a service tier if the provider supports it:
 
 ```json
 {
