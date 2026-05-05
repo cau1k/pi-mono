@@ -157,6 +157,24 @@ describe("ModelRegistry", () => {
 			}
 		});
 
+		test("serviceTier-only override resolves at request time", async () => {
+			writeRawModelsJson({
+				anthropic: {
+					serviceTier: "priority",
+				},
+			});
+
+			const registry = ModelRegistry.create(authStorage, modelsJsonPath);
+			expect(registry.getError()).toBeUndefined();
+			const model = getModelsForProvider(registry, "anthropic")[0];
+			const auth = await registry.getApiKeyAndHeaders(model);
+
+			expect(auth.ok).toBe(true);
+			if (auth.ok) {
+				expect(auth.serviceTier).toBe("priority");
+			}
+		});
+
 		test("baseUrl-only override does not affect other providers", () => {
 			writeRawModelsJson({
 				anthropic: overrideConfig("https://my-proxy.example.com/v1"),

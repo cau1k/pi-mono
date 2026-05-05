@@ -67,6 +67,8 @@ export type CacheRetention = "none" | "short" | "long";
 
 export type Transport = "sse" | "websocket" | "websocket-cached" | "auto";
 
+export type ServiceTier = "auto" | "default" | "flex" | "scale" | "priority";
+
 export interface ProviderResponse {
 	status: number;
 	headers: Record<string, string>;
@@ -109,6 +111,11 @@ export interface StreamOptions {
 	 * Not supported by all providers (e.g., AWS Bedrock uses SDK auth).
 	 */
 	headers?: Record<string, string>;
+	/**
+	 * Provider-specific service tier preference. Providers that do not support
+	 * service tiers ignore it.
+	 */
+	serviceTier?: ServiceTier;
 	/**
 	 * HTTP request timeout in milliseconds for providers/SDKs that support it.
 	 * For example, OpenAI and Anthropic SDK clients default to 10 minutes.

@@ -16,6 +16,7 @@ import {
 	type OpenAIResponsesCompat,
 	registerApiProvider,
 	resetApiProviders,
+	type ServiceTier,
 	type SimpleStreamOptions,
 } from "@mariozechner/pi-ai";
 import { registerOAuthProvider, resetOAuthProviders } from "@mariozechner/pi-ai/oauth";
@@ -180,6 +181,14 @@ const ModelOverrideSchema = Type.Object({
 
 type ModelOverride = Static<typeof ModelOverrideSchema>;
 
+const ServiceTierSchema = Type.Union([
+	Type.Literal("auto"),
+	Type.Literal("default"),
+	Type.Literal("flex"),
+	Type.Literal("scale"),
+	Type.Literal("priority"),
+]);
+
 const ProviderConfigSchema = Type.Object({
 	name: Type.Optional(Type.String({ minLength: 1 })),
 	baseUrl: Type.Optional(Type.String({ minLength: 1 })),
@@ -190,6 +199,7 @@ const ProviderConfigSchema = Type.Object({
 	authHeader: Type.Optional(Type.Boolean()),
 	models: Type.Optional(Type.Array(ModelDefinitionSchema)),
 	modelOverrides: Type.Optional(Type.Record(Type.String(), ModelOverrideSchema)),
+	serviceTier: Type.Optional(ServiceTierSchema),
 });
 
 const ModelsConfigSchema = Type.Object({
@@ -230,6 +240,7 @@ interface ProviderRequestConfig {
 	apiKey?: string;
 	headers?: Record<string, string>;
 	authHeader?: boolean;
+	serviceTier?: ServiceTier;
 }
 
 export type ResolvedRequestAuth =
@@ -237,6 +248,7 @@ export type ResolvedRequestAuth =
 			ok: true;
 			apiKey?: string;
 			headers?: Record<string, string>;
+			serviceTier?: ServiceTier;
 	  }
 	| {
 			ok: false;
@@ -516,10 +528,16 @@ export class ModelRegistry {
 				providerConfig.modelOverrides && Object.keys(providerConfig.modelOverrides).length > 0;
 
 			if (models.length === 0) {
-				// Override-only config: needs baseUrl, headers, compat, modelOverrides, or some combination.
-				if (!providerConfig.baseUrl && !providerConfig.headers && !providerConfig.compat && !hasModelOverrides) {
+				// Override-only config: needs baseUrl, headers, compat, serviceTier, modelOverrides, or some combination.
+				if (
+					!providerConfig.baseUrl &&
+					!providerConfig.headers &&
+					!providerConfig.compat &&
+					!providerConfig.serviceTier &&
+					!hasModelOverrides
+				) {
 					throw new Error(
-						`Provider ${providerName}: must specify "baseUrl", "headers", "compat", "modelOverrides", or "models".`,
+						`Provider ${providerName}: must specify "baseUrl", "headers", "compat", "serviceTier", "modelOverrides", or "models".`,
 					);
 				}
 			} else if (!isBuiltIn) {
@@ -651,9 +669,10 @@ export class ModelRegistry {
 			apiKey?: string;
 			headers?: Record<string, string>;
 			authHeader?: boolean;
+			serviceTier?: ServiceTier;
 		},
 	): void {
-		if (!config.apiKey && !config.headers && !config.authHeader) {
+		if (!config.apiKey && !config.headers && !config.authHeader && !config.serviceTier) {
 			return;
 		}
 
@@ -661,6 +680,7 @@ export class ModelRegistry {
 			apiKey: config.apiKey,
 			headers: config.headers,
 			authHeader: config.authHeader,
+			serviceTier: config.serviceTier,
 		});
 	}
 
@@ -708,6 +728,7 @@ export class ModelRegistry {
 				ok: true,
 				apiKey,
 				headers: headers && Object.keys(headers).length > 0 ? headers : undefined,
+				serviceTier: providerConfig?.serviceTier,
 			};
 		} catch (error) {
 			return {
@@ -933,6 +954,7 @@ export interface ProviderConfigInput {
 	streamSimple?: (model: Model<Api>, context: Context, options?: SimpleStreamOptions) => AssistantMessageEventStream;
 	headers?: Record<string, string>;
 	authHeader?: boolean;
+	serviceTier?: ServiceTier;
 	/** OAuth provider for /login support */
 	oauth?: Omit<OAuthProviderInterface, "id">;
 	models?: Array<{

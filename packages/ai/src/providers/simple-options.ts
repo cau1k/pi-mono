@@ -10,6 +10,7 @@ export function buildBaseOptions(model: Model<Api>, options?: SimpleStreamOption
 		cacheRetention: options?.cacheRetention,
 		sessionId: options?.sessionId,
 		headers: options?.headers,
+		serviceTier: options?.serviceTier,
 		onPayload: options?.onPayload,
 		onResponse: options?.onResponse,
 		timeoutMs: options?.timeoutMs,

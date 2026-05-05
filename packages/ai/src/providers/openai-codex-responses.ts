@@ -70,7 +70,7 @@ const CODEX_RESPONSE_STATUSES = new Set<CodexResponseStatus>([
 export interface OpenAICodexResponsesOptions extends StreamOptions {
 	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
 	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
-	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
+	serviceTier?: Exclude<ResponseCreateParamsStreaming["service_tier"], null>;
 	textVerbosity?: "low" | "medium" | "high";
 }
 

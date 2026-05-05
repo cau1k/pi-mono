@@ -138,6 +138,7 @@ Set `api` at provider level (default for all models) or model level (override pe
 | `apiKey` | API key (see value resolution below) |
 | `headers` | Custom headers (see value resolution below) |
 | `authHeader` | Set `true` to add `Authorization: Bearer <apiKey>` automatically |
+| `serviceTier` | Provider service tier: `auto`, `default`, `flex`, `scale`, or `priority` |
 | `models` | Array of model configurations |
 | `modelOverrides` | Per-model overrides for built-in models on this provider |
 
@@ -260,6 +261,18 @@ Route a built-in provider through a proxy without redefining models:
 ```
 
 All built-in Anthropic models remain available. Existing OAuth or API key auth continues to work.
+
+Set a provider service tier:
+
+```json
+{
+  "providers": {
+    "openai-codex": {
+      "serviceTier": "priority"
+    }
+  }
+}
+```
 
 To merge custom models into a built-in provider, include the `models` array:
 
