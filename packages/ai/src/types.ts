@@ -112,8 +112,10 @@ export interface StreamOptions {
 	 */
 	headers?: Record<string, string>;
 	/**
-	 * Provider-specific service tier preference. Providers that do not support
-	 * service tiers ignore it.
+	 * Optional provider service tier that affects cost, latency, and throttling.
+	 * OpenAI, Anthropic, AWS Bedrock, and Google Vertex all support a "priority" tier.
+	 * Many gateways support pass through (e.g., Vercel AI Gateway, OpenRouter)
+	 * Not supported by all providers.
 	 */
 	serviceTier?: ServiceTier;
 	/**
